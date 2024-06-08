@@ -21,6 +21,7 @@ class Category(BaseModel):
     title = models.CharField(max_length=256, verbose_name='Заголовок')
     description = models.TextField(verbose_name='Описание')
     slug = models.SlugField(
+        max_length=256,
         unique=True, verbose_name='Идентификатор',
         help_text='Идентификатор страницы для URL; разрешены символы латиницы,'
         ' цифры, дефис и подчёркивание.'
@@ -31,7 +32,7 @@ class Category(BaseModel):
         verbose_name_plural = 'Категории'
 
     def __str__(self):
-        return self.title
+        return self.title[:20]
 
 
 class Location(BaseModel):
@@ -42,7 +43,7 @@ class Location(BaseModel):
         verbose_name_plural = 'Местоположения'
 
     def __str__(self):
-        return self.name
+        return self.name[:20]
 
 
 class Post(BaseModel):
@@ -53,16 +54,22 @@ class Post(BaseModel):
         help_text='Если установить дату и время в будущем — можно делать'
         ' отложенные публикации.'
     )
+
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name='Автор публикации'
+        User, on_delete=models.CASCADE, verbose_name='Автор публикации',
+        related_name='authors'
     )
+
     location = models.ForeignKey(
         Location, on_delete=models.SET_NULL, null=True, blank=True,
-        verbose_name='Местоположение'
+        verbose_name='Местоположение',
+        related_name='locations'
     )
+
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, null=True,
-        verbose_name='Категория'
+        verbose_name='Категория',
+        related_name='categorys'
     )
 
     class Meta:
@@ -70,4 +77,4 @@ class Post(BaseModel):
         verbose_name_plural = 'Публикации'
 
     def __str__(self):
-        return self.title
+        return self.title[:20]

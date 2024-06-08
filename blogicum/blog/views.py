@@ -5,12 +5,7 @@ from django.utils.timezone import now
 
 def index(request):
 
-    post_list = Post.objects.select_related(
-        'location', 'author', 'category'
-    ).filter(pub_date__lte=now(),
-             is_published=True,
-             category__is_published=True
-             ).order_by('-pub_date')[:5]
+    post_list = get_posts(Post.objects).order_by('-pub_date')[:5]
 
     return render(request, 'blog/index.html', {'post_list': post_list})
 
@@ -20,28 +15,22 @@ def category_posts(request, category_slug):
     category = get_object_or_404(
         Category, slug=category_slug, is_published=True)
 
-    post_list = Post.objects.filter(
+    post_list = category.categorys.filter(
         pub_date__lte=now(),
-        is_published=True,
-        category__is_published=True,
-        category=category)
+        is_published=True)
 
     context = {'category': category, 'post_list': post_list}
     return render(request, 'blog/category.html', context)
 
 
-def post_detail(request, id):
+def post_detail(request, post_id):
 
-    post = get_object_or_404(
-        Post.objects.select_related(
-            'location',
-            'author',
-            'category',
-        ).filter(
-            is_published=True,
-            category__is_published=True,
-            pub_date__lte=now()
-        ),
-        id=id)
-
+    post = get_object_or_404(get_posts(Post.objects), id=post_id)
     return render(request, 'blog/detail.html', {'post': post})
+
+
+def get_posts(post_objects):
+    return post_objects.select_related(
+        'location', 'author', 'category'
+    ).filter(pub_date__lte=now(),
+             is_published=True, category__is_published=True)
